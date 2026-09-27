@@ -10,3 +10,6 @@ let read_numbered_lines input_filename =
     in
     Ok numbered_lines
   with Sys_error message -> Error message
+
+let parse_file numbered_lines =
+  Parser.parse_lines numbered_lines
