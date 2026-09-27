@@ -1,5 +1,9 @@
 (** Coordinates the whole pipeline from reading .pic files to writing .svg. *)
 
+(** [read_numbered_lines input_filename] reads all lines from [input_filename]
+    and returns them paired with their line numbers. Returns [Ok numbered_lines]
+    if the file is read successfully, or [Error message] if the file is invalid.
+*)
 let read_numbered_lines input_filename =
   try
     let lines =
@@ -11,5 +15,6 @@ let read_numbered_lines input_filename =
     Ok numbered_lines
   with Sys_error message -> Error message
 
-let parse_file numbered_lines =
-  Parser.parse_lines numbered_lines
+(** [parse_file numbered_lines] parses [numbered_lines]. Return is based on
+    Parser.parse_lines. *)
+let parse_file numbered_lines = Parser.parse_lines numbered_lines
