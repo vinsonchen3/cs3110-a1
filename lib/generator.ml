@@ -1,0 +1,1 @@
+(** Coordinates the whole pipeline from reading .pic files to writing .svg. *)
