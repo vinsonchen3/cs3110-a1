@@ -15,24 +15,25 @@ let split_words line =
   line |> String.split_on_char ' ' |> List.filter (fun word -> word <> "")
 
 (** [parse_color word line_number] converts [word] to its corresponding
-    [Picture.color]. Raises [ParseError] if [word] is not a valid color. *)
+    [Picture.color] option. Raises [ParseError] if [word] is not a valid color.
+*)
 let parse_color word line_number =
   match word with
-  | "black" -> Picture.Black
-  | "white" -> White
-  | "gray" -> Gray
-  | "red" -> Red
-  | "orange" -> Orange
-  | "yellow" -> Yellow
-  | "green" -> Green
-  | "blue" -> Blue
-  | "purple" -> Purple
-  | "pink" -> Pink
-  | "brown" -> Brown
-  | "navy" -> Navy
-  | "teal" -> Teal
-  | "gold" -> Gold
-  | "cream" -> Cream
+  | "black" -> Some Picture.Black
+  | "white" -> Some White
+  | "gray" -> Some Gray
+  | "red" -> Some Red
+  | "orange" -> Some Orange
+  | "yellow" -> Some Yellow
+  | "green" -> Some Green
+  | "blue" -> Some Blue
+  | "purple" -> Some Purple
+  | "pink" -> Some Pink
+  | "brown" -> Some Brown
+  | "navy" -> Some Navy
+  | "teal" -> Some Teal
+  | "gold" -> Some Gold
+  | "cream" -> Some Cream
   | _ ->
       raise
         (ParseError
@@ -74,7 +75,7 @@ let parse_canvas line_number words =
 
       let background =
         if background_text = "none" then None
-        else Some (parse_color background_text line_number)
+        else parse_color background_text line_number
       in
 
       { Picture.width; height; background }
