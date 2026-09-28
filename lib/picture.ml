@@ -32,6 +32,23 @@ type rectangle = {
   fill : color;
 }
 
+type line = {
+  x1 : float;
+  y1 : float;
+  x2 : float;
+  y2 : float;
+  stroke : color;
+  width : float;
+}
+
+type text = {
+  x : float;
+  y : float;
+  size : float;
+  fill : color;
+  contents : string;
+}
+
 type element =
   | Circle of circle
   | Rectangle of rectangle

@@ -3,21 +3,21 @@
 (** Converts a color to its SVG color name. *)
 let string_of_color color =
   match color with
-  | Picture.Black -> "black"
-  | White -> "white"
-  | Gray -> "gray"
-  | Red -> "red"
-  | Orange -> "orange"
-  | Yellow -> "yellow"
-  | Green -> "green"
-  | Blue -> "blue"
-  | Purple -> "purple"
-  | Pink -> "pink"
-  | Brown -> "brown"
-  | Navy -> "navy"
-  | Teal -> "teal"
-  | Gold -> "gold"
-  | Cream -> "cream"
+  | Picture.Black -> "#111111"
+  | White -> "#ffffff"
+  | Gray -> "#808080"
+  | Red -> "#c1121f"
+  | Orange -> "#f77f00"
+  | Yellow -> "#fcbf49"
+  | Green -> "#2a9d8f"
+  | Blue -> "#277da1"
+  | Purple -> "#7b2cbf"
+  | Pink -> "#e76f91"
+  | Brown -> "#8d6e63"
+  | Navy -> "#091226"
+  | Teal -> "#008080"
+  | Gold -> "#d9a441"
+  | Cream -> "#fff1b0"
 
 (** [render_element element] converts a picture element to SVG text. *)
 let render_element element =
