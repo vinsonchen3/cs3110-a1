@@ -9,3 +9,18 @@
   $ dune exec ../bin/main.exe -- ../examples/malformed_rectangle.pic malformed_rectangle.svg
   Error: Rectangle width must be positive on line 2
   [1]
+
+  $ dune exec ../bin/main.exe -- ../examples/malformed_line_width_nonint.pic no.svg 
+  Error: Invalid line width on line 2
+  [1]
+
+  $ dune exec ../bin/main.exe -- ../examples/malformed_line_width_nonpos.pic no.svg
+  Error: line width must be positive on line 2
+  [1]
+  $ dune exec ../bin/main.exe -- ../examples/malformed_text_size.pic no.svg
+  Error: text size must be positive on line 2
+  [1]
+
+  $ dune exec ../bin/main.exe -- ../examples/malformed_text_empty.pic no.svg
+  Error: Text contents cannot be empty on line 2
+  [1]
