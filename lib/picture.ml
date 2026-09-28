@@ -49,11 +49,17 @@ type text = {
   contents : string;
 }
 
+type transform =
+  | Translate of float * float
+  | Rotate of float
+  | Scale of float
+
 type element =
   | Circle of circle
   | Rectangle of rectangle
   | Line of line
   | Text of text
+  | Transform of transform * element list
 
 type picture = {
   width : float;
