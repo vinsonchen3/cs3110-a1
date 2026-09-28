@@ -1,1 +1,0 @@
-(** Converts typed picture data into SVG format. *)

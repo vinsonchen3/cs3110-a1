@@ -18,3 +18,18 @@ let read_numbered_lines input_filename =
 (** [parse_file numbered_lines] parses [numbered_lines]. Return is based on
     Parser.parse_lines. *)
 let parse_file numbered_lines = Parser.parse_lines numbered_lines
+
+let create_svg input_filename output_filename =
+  match read_numbered_lines input_filename with
+  | Error message -> Error message
+  | Ok numbered_lines -> (
+      match parse_file numbered_lines with
+      | Error message -> Error message
+      | Ok picture -> (
+          let svg_text = Svg.render_to_svg picture in
+          try
+            Out_channel.with_open_text output_filename
+              (fun channel -> output_string channel svg_text)
+              Ok ()
+          with Sys_error message ->
+            Error ("Couldn't write output file " ^ message)))
