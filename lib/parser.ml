@@ -19,21 +19,21 @@ let split_words line =
 *)
 let parse_color word line_number =
   match word with
-  | "black" -> Some Picture.Black
-  | "white" -> Some White
-  | "gray" -> Some Gray
-  | "red" -> Some Red
-  | "orange" -> Some Orange
-  | "yellow" -> Some Yellow
-  | "green" -> Some Green
-  | "blue" -> Some Blue
-  | "purple" -> Some Purple
-  | "pink" -> Some Pink
-  | "brown" -> Some Brown
-  | "navy" -> Some Navy
-  | "teal" -> Some Teal
-  | "gold" -> Some Gold
-  | "cream" -> Some Cream
+  | "black" -> Picture.Black
+  | "white" -> White
+  | "gray" -> Gray
+  | "red" -> Red
+  | "orange" -> Orange
+  | "yellow" -> Yellow
+  | "green" -> Green
+  | "blue" -> Blue
+  | "purple" -> Purple
+  | "pink" -> Pink
+  | "brown" -> Brown
+  | "navy" -> Navy
+  | "teal" -> Teal
+  | "gold" -> Gold
+  | "cream" -> Cream
   | _ ->
       raise
         (ParseError
@@ -72,24 +72,82 @@ let parse_canvas line_number words =
 
       let background =
         if background_text = "none" then None
-        else parse_color background_text line_number
+        else Some (parse_color background_text line_number)
       in
 
-      { Picture.width; height; background }
+      { Picture.width; height; background; elements = [] }
   | _ ->
       raise
         (ParseError
            ("No valid canvas was found on line " ^ string_of_int line_number))
 
-(** [parse_lines numbered_lines] parses the first non-blank line in
-    [numbered_lines] as a canvas declaration. Returns [Ok picture] if parsing
-    succeeds, or [Error message] if the input is all blank. *)
+(** [parse_circle line_number words] parses a circle. Raises [ParseError] if the
+    parameters are malformed. *)
+let parse_circle line_number words =
+  match words with
+  | [ "circle"; center_x_text; center_y_text; radius_text; color_text ] ->
+      let c_x = parse_float center_x_text "circle center-x" line_number in
+      let c_y = parse_float center_y_text "circle center-y" line_number in
+      let radius =
+        parse_positive_float radius_text "Circle radius" line_number
+      in
+      let fill = parse_color color_text line_number in
+
+      Picture.Circle { Picture.c_x; c_y; radius; fill }
+  | _ ->
+      raise (ParseError ("Invalid circle on line " ^ string_of_int line_number))
+
+(** [parse_rectangle line_number words] parses a rectangle. Raises [ParseError]
+    if the parameters are malformed. *)
+let parse_rectangle line_number words =
+  match words with
+  | [ "rectangle"; x_text; y_text; width_text; height_text; color_text ] ->
+      let x = parse_float x_text "rectangle x" line_number in
+      let y = parse_float y_text "rectangle y" line_number in
+      let width =
+        parse_positive_float width_text "Rectangle width" line_number
+      in
+      let height =
+        parse_positive_float height_text "Rectangle height" line_number
+      in
+      let fill = parse_color color_text line_number in
+
+      Picture.Rectangle { Picture.x; y; width; height; fill }
+  | _ ->
+      raise
+        (ParseError ("Invalid rectangle on line " ^ string_of_int line_number))
+
+(** [parse_element line_number words] parses the next element. Raises
+    [ParseError] if next line isn't element. *)
+let parse_element line_number words =
+  match words with
+  | "circle" :: _ -> parse_circle line_number words
+  | "rectangle" :: _ -> parse_rectangle line_number words
+  | word :: _ ->
+      raise
+        (ParseError
+           ("Unknown picture element '" ^ word ^ "' on line "
+          ^ string_of_int line_number))
+  | [] ->
+      raise
+        (ParseError
+           ("Empty picture element on line " ^ string_of_int line_number))
+
+(** [parse_lines numbered_lines] parses a canvas and then the following
+    elements, if there are any. *)
 let parse_lines numbered_lines =
   try
     let lines = filter_lines numbered_lines in
     match lines with
     | [] -> Error "Invalid input (only blank lines)"
-    | (line_number, line) :: _ ->
-        let words = split_words line in
-        Ok (parse_canvas line_number words)
+    | (canvas_line_number, canvas_line) :: element_lines ->
+        let canvas_words = split_words canvas_line in
+        let canvas = parse_canvas canvas_line_number canvas_words in
+        let elements =
+          List.map
+            (fun (line_number, line) ->
+              parse_element line_number (split_words line))
+            element_lines
+        in
+        Ok { canvas with elements }
   with ParseError message -> Error message
