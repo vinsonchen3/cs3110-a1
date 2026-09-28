@@ -39,39 +39,36 @@ let parse_color word line_number =
         (ParseError
            ("Invalid color: " ^ word ^ " on line " ^ string_of_int line_number))
 
+(** [parse_float word name line_number] converts [word] to a float. Raises
+    [ParseError] with a helpful message if conversion fails. *)
+let parse_float word name line_number =
+  match float_of_string_opt word with
+  | Some num -> num
+  | None ->
+      raise
+        (ParseError ("Invalid " ^ name ^ " on line " ^ string_of_int line_number))
+
+(** [parse_positive_float word name line_number] parses [word] as a positive
+    floating-point number. Raises [ParseError] if the value is not positive. *)
+let parse_positive_float word name line_number =
+  let num = parse_float word name line_number in
+  if num <= 0.0 then
+    raise
+      (ParseError
+         (name ^ " must be positive on line " ^ string_of_int line_number))
+  else num
+
 (** [parse_canvas line_number words] parses [words] for canvases and returns the
     corresponding [Picture.picture]. Raises [ParseError] if the declaration is
     invalid. *)
 let parse_canvas line_number words =
   match words with
   | [ "canvas"; width_text; height_text; background_text ] ->
-      let width =
-        match float_of_string_opt width_text with
-        | Some num -> num
-        | None ->
-            raise
-              (ParseError ("Invalid width on line " ^ string_of_int line_number))
-      in
+      let width = parse_positive_float width_text "canvas width" line_number in
 
       let height =
-        match float_of_string_opt height_text with
-        | Some num -> num
-        | None ->
-            raise
-              (ParseError ("Invalid height on line " ^ string_of_int line_number))
+        parse_positive_float height_text "canvas height" line_number
       in
-
-      if width <= 0.0 then
-        raise
-          (ParseError
-             ("Canvas width must be positive on line "
-            ^ string_of_int line_number));
-
-      if height <= 0.0 then
-        raise
-          (ParseError
-             ("Canvas height must be positive on line "
-            ^ string_of_int line_number));
 
       let background =
         if background_text = "none" then None

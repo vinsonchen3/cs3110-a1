@@ -40,4 +40,5 @@ type picture = {
   width : float;
   height : float;
   background : color option;
+  elements: element list
 }
