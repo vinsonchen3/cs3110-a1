@@ -52,6 +52,8 @@ type text = {
 type element =
   | Circle of circle
   | Rectangle of rectangle
+  | Line of line
+  | Text of text
 
 type picture = {
   width : float;

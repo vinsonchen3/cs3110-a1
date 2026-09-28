@@ -29,6 +29,16 @@ let render_element element =
       Printf.sprintf
         "<rect x=\"%g\" y=\"%g\" width=\"%g\" height=\"%g\" fill=\"%s\" />" x y
         width height (string_of_color fill)
+  | Picture.Line { x1; y1; x2; y2; stroke; width } ->
+      Printf.sprintf
+        "<line x1=\"%g\" y1=\"%g\" x2=\"%g\" y2=\"%g\" stroke=\"%s\" \
+         stroke-width=\"%g\" />"
+        x1 y1 x2 y2 (string_of_color stroke) width
+  | Picture.Text { x; y; size; fill; contents } ->
+      Printf.sprintf
+        "<text x=\"%g\" y=\"%g\" font-size=\"%g\" fill=\"%s\" \
+         text-anchor=\"middle\">%s</text>"
+        x y size (string_of_color fill) contents
 
 (** [render_elements elements] renders all elements in order. *)
 let render_elements elements =

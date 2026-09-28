@@ -117,21 +117,56 @@ let parse_rectangle line_number words =
       raise
         (ParseError ("Invalid rectangle on line " ^ string_of_int line_number))
 
+(** [parse_line line_number words] parses a line element. Raises [ParseError] if
+    the parameters are malformed. *)
+let parse_line line_number words =
+  match words with
+  | [ "line"; x1_text; y1_text; x2_text; y2_text; color_text; width_text ] ->
+      let x1 = parse_float x1_text "line x1" line_number in
+      let y1 = parse_float y1_text "line y1" line_number in
+      let x2 = parse_float x2_text "line x2" line_number in
+      let y2 = parse_float y2_text "line y2" line_number in
+      let stroke = parse_color color_text line_number in
+      let width = parse_positive_float width_text "line width" line_number in
+      Picture.Line { Picture.x1; y1; x2; y2; stroke; width }
+  | _ ->
+      raise (ParseError ("Invalid line on line " ^ string_of_int line_number))
+
+(** [parse_text line_number words] parses a text element. Raises [ParseError] if
+    the parameters are malformed or the text is empty. *)
+let parse_text line_number words =
+  match words with
+  | "text" :: x_text :: y_text :: size_text :: color_text :: contents ->
+      if contents = [] then
+        raise
+          (ParseError
+             ("Text contents cannot be empty on line "
+            ^ string_of_int line_number))
+      else
+        let x = parse_float x_text "text x" line_number in
+        let y = parse_float y_text "text y" line_number in
+        let size = parse_positive_float size_text "text size" line_number in
+        let fill = parse_color color_text line_number in
+        let contents = String.concat " " contents in
+        Picture.Text { Picture.x; y; size; fill; contents }
+  | _ ->
+      raise (ParseError ("Invalid text on line " ^ string_of_int line_number))
+
 (** [parse_element line_number words] parses the next element. Raises
     [ParseError] if next line isn't element. *)
 let parse_element line_number words =
   match words with
   | "circle" :: _ -> parse_circle line_number words
   | "rectangle" :: _ -> parse_rectangle line_number words
+  | "line" :: _ -> parse_line line_number words
+  | "text" :: _ -> parse_text line_number words
   | word :: _ ->
       raise
         (ParseError
            ("Unknown picture element '" ^ word ^ "' on line "
           ^ string_of_int line_number))
   | [] ->
-      raise
-        (ParseError
-           ("Empty picture element on line " ^ string_of_int line_number))
+      raise (ParseError ("Empty element on line " ^ string_of_int line_number))
 
 (** [parse_lines numbered_lines] parses a canvas and then the following
     elements, if there are any. *)
