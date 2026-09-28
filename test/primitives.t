@@ -24,3 +24,7 @@
   $ dune exec ../bin/main.exe -- ../examples/malformed_text_empty.pic no.svg
   Error: Text contents cannot be empty on line 2
   [1]
+
+  $ dune exec ../bin/main.exe -- ../examples/primitives.pic primitives.svg
+  $ cat primitives.svg
+  <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect x="0" y="0" width="400" height="300" fill="#ffffff" /> <circle cx="100" cy="100" r="40" fill="#c1121f" /><rect x="200" y="75" width="100" height="75" fill="#2a9d8f" /><line x1="25" y1="175" x2="375" y2="190" stroke="#111111" stroke-width="4" /><text x="200" y="35" font-size="24" fill="#111111" text-anchor="middle">HI THERE</text></svg>
