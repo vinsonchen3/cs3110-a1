@@ -238,6 +238,7 @@ and parse_element (line_number, line) rest =
   | "line" :: _ -> (parse_line line_number words, rest)
   | "text" :: _ -> (parse_text line_number words, rest)
   | "transform" :: _ -> parse_transform_section line_number words rest
+  | "repeat" :: _ -> parse_repeat_section line_number words rest
   | word :: _ ->
       raise
         (ParseError
