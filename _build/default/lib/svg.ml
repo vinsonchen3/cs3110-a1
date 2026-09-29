@@ -19,8 +19,15 @@ let string_of_color color =
   | Gold -> "#d9a441"
   | Cream -> "#fff1b0"
 
+(** [string_of_transform transform] converts a transformation to SVG text. *)
+let svg_of_transform transform =
+  match transform with
+  | Picture.Translate (dx, dy) -> Printf.sprintf "translate(%g %g)" dx dy
+  | Picture.Rotate degrees -> Printf.sprintf "rotate(%g)" degrees
+  | Picture.Scale factor -> Printf.sprintf "scale(%g)" factor
+
 (** [render_element element] converts a picture element to SVG text. *)
-let render_element element =
+let rec render_element element =
   match element with
   | Picture.Circle { c_x; c_y; radius; fill } ->
       Printf.sprintf "<circle cx=\"%g\" cy=\"%g\" r=\"%g\" fill=\"%s\" />" c_x
@@ -39,9 +46,13 @@ let render_element element =
         "<text x=\"%g\" y=\"%g\" font-size=\"%g\" fill=\"%s\" \
          text-anchor=\"middle\">%s</text>"
         x y size (string_of_color fill) contents
+  | Picture.Transform (transform, elements) ->
+      Printf.sprintf "<g transform=\"%s\">%s</g>"
+        (svg_of_transform transform)
+        (render_elements elements)
 
 (** [render_elements elements] renders all elements in order. *)
-let render_elements elements =
+and render_elements elements =
   let rendered = List.map render_element elements in
   String.concat "" rendered
 

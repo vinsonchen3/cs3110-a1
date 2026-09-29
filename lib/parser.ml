@@ -154,12 +154,57 @@ let parse_text line_number words =
 
 (** [parse_element line_number words] parses the next element. Raises
     [ParseError] if next line isn't element. *)
-let parse_element line_number words =
+
+(** [parse_transform line_number words] parses a transformation header. Raises
+    [ParseError] if the transformation is malformed or its parameters are
+    invalid. *)
+let parse_transform line_number words =
   match words with
-  | "circle" :: _ -> parse_circle line_number words
-  | "rectangle" :: _ -> parse_rectangle line_number words
-  | "line" :: _ -> parse_line line_number words
-  | "text" :: _ -> parse_text line_number words
+  | [ "transform"; "translate"; dx_text; dy_text ] ->
+      let dx = parse_float dx_text "translation x" line_number in
+      let dy = parse_float dy_text "translation y" line_number in
+      Picture.Translate (dx, dy)
+  | [ "transform"; "rotate"; degrees_text ] ->
+      let degrees = parse_float degrees_text "rotation degrees" line_number in
+      Picture.Rotate degrees
+  | [ "transform"; "scale"; factor_text ] ->
+      let factor =
+        parse_positive_float factor_text "scale factor" line_number
+      in
+      Picture.Scale factor
+  | _ ->
+      raise
+        (ParseError ("Invalid transform on line " ^ string_of_int line_number))
+
+(** [parse_elements lines] recursively parses elements until it reaches an [end]
+    line or the end of [lines]. It returns the entries in source order together
+    with the unconsumed lines. It raises [Parse_error] if it encounters a
+    malformed line.*)
+let rec parse_elements lines =
+  match lines with
+  | [] -> ([], [])
+  | (line_number, line) :: rest -> (
+      let words = split_words line in
+      match words with
+      | [ "end" ] -> ([], (line_number, line) :: rest)
+      | "end" :: _ ->
+          raise
+            (ParseError ("Invalid end on line " ^ string_of_int line_number))
+      | _ ->
+          let element, remaining = parse_element (line_number, line) rest in
+          let elements, final_remaining = parse_elements remaining in
+          (element :: elements, final_remaining))
+
+(** [parse_element (line_number, line) rest] parses the next picture element and
+    returns the parsed elementwith the remaining lines. *)
+and parse_element (line_number, line) rest =
+  let words = split_words line in
+  match words with
+  | "circle" :: _ -> (parse_circle line_number words, rest)
+  | "rectangle" :: _ -> (parse_rectangle line_number words, rest)
+  | "line" :: _ -> (parse_line line_number words, rest)
+  | "text" :: _ -> (parse_text line_number words, rest)
+  | "transform" :: _ -> parse_transform_section line_number words rest
   | word :: _ ->
       raise
         (ParseError
@@ -168,6 +213,24 @@ let parse_element line_number words =
   | [] ->
       raise (ParseError ("Empty element on line " ^ string_of_int line_number))
 
+(** [parse_transform_block line_number words rest] parses a transformation and
+    its elements until the matching [end]. *)
+and parse_transform_section line_number words rest =
+  let transform = parse_transform line_number words in
+  let elements, remaining = parse_elements rest in
+  match remaining with
+  | [] ->
+      raise
+        (ParseError
+           ("Transform block on line " ^ string_of_int line_number
+          ^ " is missing end"))
+  | (end_line_number, end_line) :: after_end ->
+      if split_words end_line = [ "end" ] then
+        (Picture.Transform (transform, elements), after_end)
+      else
+        raise
+          (ParseError ("Expected end on line " ^ string_of_int end_line_number))
+
 (** [parse_lines numbered_lines] parses a canvas and then the following
     elements, if there are any. *)
 let parse_lines numbered_lines =
@@ -175,14 +238,14 @@ let parse_lines numbered_lines =
     let lines = filter_lines numbered_lines in
     match lines with
     | [] -> Error "Invalid input (only blank lines)"
-    | (canvas_line_number, canvas_line) :: element_lines ->
+    | (canvas_line_number, canvas_line) :: element_lines -> (
         let canvas_words = split_words canvas_line in
         let canvas = parse_canvas canvas_line_number canvas_words in
-        let elements =
-          List.map
-            (fun (line_number, line) ->
-              parse_element line_number (split_words line))
-            element_lines
-        in
-        Ok { canvas with elements }
+        let elements, remaining = parse_elements element_lines in
+        match remaining with
+        | [] -> Ok { canvas with elements }
+        | (end_line_number, _) :: _ ->
+            raise
+              (ParseError
+                 ("Invalid end on line " ^ string_of_int end_line_number)))
   with ParseError message -> Error message
