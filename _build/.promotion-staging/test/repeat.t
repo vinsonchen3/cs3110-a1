@@ -33,6 +33,10 @@ Repeat rotation
   $ cat repeat_rotation.svg
   <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect x="0" y="0" width="400" height="400" fill="#ffffff" /> <g transform="translate(200 200)"><g transform="rotate(0)"><rect x="-25" y="-112.5" width="50" height="25" fill="#277da1" /></g><g transform="rotate(45)"><rect x="-25" y="-112.5" width="50" height="25" fill="#277da1" /></g><g transform="rotate(90)"><rect x="-25" y="-112.5" width="50" height="25" fill="#277da1" /></g></g></svg>
 
+Repeat scaled copies
+  $ dune exec ../bin/main.exe -- ../examples/repeat_scale.pic repeat_scale.svg
+  $ cat repeat_scale.svg
+  <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect x="0" y="0" width="400" height="400" fill="#ffffff" /> <g transform="scale(1)"><circle cx="50" cy="50" r="10" fill="#111111" /></g><g transform="scale(1.5)"><circle cx="50" cy="50" r="10" fill="#111111" /></g><g transform="scale(2.25)"><circle cx="50" cy="50" r="10" fill="#111111" /></g></svg>
 Bad repeat count
   $ dune exec ../bin/main.exe -- ../examples/repeat_malformed_count.pic no.svg
   Error: Invalid repeat count on line 2
@@ -42,4 +46,3 @@ Bad negative repeat count
   $ dune exec ../bin/main.exe -- ../examples/repeat_negative_count.pic no.svg
   Error: Repeat count cannot be negative on line 2
   [1]
-```

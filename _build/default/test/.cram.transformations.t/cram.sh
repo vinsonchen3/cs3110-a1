@@ -15,3 +15,5 @@
   $ dune exec ../bin/main.exe ../examples/malformed_transform.pic malformed.svg
   $ dune exec ../bin/main.exe ../examples/unexpected_end.pic unexpected.svg
   $ dune exec ../bin/main.exe ../examples/missing_end.pic missing.svg
+  $ dune exec ../bin/main.exe -- ../examples/transform_empty.pic transform_empty.svg
+  $ cat transform_empty.svg

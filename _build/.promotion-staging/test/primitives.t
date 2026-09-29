@@ -35,7 +35,7 @@ Bad lind width non-pos int
 
 Bad text
   $ dune exec ../bin/main.exe -- ../examples/malformed_text.pic no.svg
-  Error: Invalid text on line 2
+  Error: Text contents cannot be empty on line 2
   [1]
 
 Bad text size

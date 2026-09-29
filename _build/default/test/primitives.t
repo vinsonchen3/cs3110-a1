@@ -8,9 +8,19 @@ Bad circle
   Error: Invalid circle on line 2
   [1]
 
+Bad circle radius
+  $ dune exec ../bin/main.exe -- ../examples/malformed_circle_radius.pic no.svg
+  Error: Circle radius must be positive on line 2
+  [1]
+
 Bad rectangle width
   $ dune exec ../bin/main.exe -- ../examples/malformed_rectangle.pic malformed_rectangle.svg
   Error: Rectangle width must be positive on line 2
+  [1]
+
+Bad line
+  $ dune exec ../bin/main.exe -- ../examples/malformed_line.pic no.svg
+  Error: Invalid line on line 2
   [1]
 
 Bad line width non-int
@@ -21,6 +31,11 @@ Bad line width non-int
 Bad lind width non-pos int
   $ dune exec ../bin/main.exe -- ../examples/malformed_line_width_nonpos.pic no.svg
   Error: line width must be positive on line 2
+  [1]
+
+Bad text
+  $ dune exec ../bin/main.exe -- ../examples/malformed_text.pic no.svg
+  Error: Invalid text on line 2
   [1]
 
 Bad text size
