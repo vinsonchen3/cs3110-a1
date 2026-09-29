@@ -176,6 +176,39 @@ let parse_transform line_number words =
       raise
         (ParseError ("Invalid transform on line " ^ string_of_int line_number))
 
+(** [parse_count word line_number] parses a nonnegative integer repeat count. *)
+let parse_count word line_number =
+  match int_of_string_opt word with
+  | None ->
+      raise
+        (ParseError ("Invalid repeat count on line " ^ string_of_int line_number))
+  | Some count when count < 0 ->
+      raise
+        (ParseError
+           ("Repeat count cannot be negative on line "
+          ^ string_of_int line_number))
+  | Some count -> count
+
+(** [parse_repeat line_number words] parses a repeat header and returns its
+    count and transformation. *)
+let parse_repeat line_number words =
+  match words with
+  | [ "repeat"; count; "translate"; dx; dy ] ->
+      let count = parse_count count line_number in
+      let dx = parse_float dx "translation x" line_number in
+      let dy = parse_float dy "translation y" line_number in
+      (count, Picture.Translate (dx, dy))
+  | [ "repeat"; count; "rotate"; degrees ] ->
+      let count = parse_count count line_number in
+      let degrees = parse_float degrees "rotation degrees" line_number in
+      (count, Picture.Rotate degrees)
+  | [ "repeat"; count; "scale"; factor ] ->
+      let count = parse_count count line_number in
+      let factor = parse_positive_float factor "scale factor" line_number in
+      (count, Picture.Scale factor)
+  | _ ->
+      raise (ParseError ("Invalid repeat on line " ^ string_of_int line_number))
+
 (** [parse_elements lines] recursively parses elements until it reaches an [end]
     line or the end of [lines]. It returns the entries in source order together
     with the unconsumed lines. It raises [Parse_error] if it encounters a
@@ -227,6 +260,24 @@ and parse_transform_section line_number words rest =
   | (end_line_number, end_line) :: after_end ->
       if split_words end_line = [ "end" ] then
         (Picture.Transform (transform, elements), after_end)
+      else
+        raise
+          (ParseError ("Expected end on line " ^ string_of_int end_line_number))
+
+(** [parse_repeat_section line_number words rest] parses a repeat block and its
+    elements until the matching [end]. *)
+and parse_repeat_section line_number words rest =
+  let count, transform = parse_repeat line_number words in
+  let elements, remaining = parse_elements rest in
+  match remaining with
+  | [] ->
+      raise
+        (ParseError
+           ("Repeat block on line " ^ string_of_int line_number
+          ^ " is missing end"))
+  | (end_line_number, end_line) :: after_end ->
+      if split_words end_line = [ "end" ] then
+        (Picture.Repeat (count, transform, elements), after_end)
       else
         raise
           (ParseError ("Expected end on line " ^ string_of_int end_line_number))

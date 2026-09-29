@@ -19,6 +19,13 @@ let string_of_color color =
   | Gold -> "#d9a441"
   | Cream -> "#fff1b0"
 
+let repeat_transform transform index =
+  let i = float_of_int index in
+  match transform with
+  | Picture.Translate (dx, dy) -> Picture.Translate (i *. dx, i *. dy)
+  | Picture.Rotate degrees -> Picture.Rotate (i *. degrees)
+  | Picture.Scale factor -> Picture.Scale (factor ** i)
+
 (** [string_of_transform transform] converts a transformation to SVG text. *)
 let svg_of_transform transform =
   match transform with
@@ -50,6 +57,19 @@ let rec render_element element =
       Printf.sprintf "<g transform=\"%s\">%s</g>"
         (svg_of_transform transform)
         (render_elements elements)
+  | Picture.Repeat (count, transform, elements) ->
+      let rec render_copies index =
+        if index >= count then ""
+        else
+          let current_transform = repeat_transform transform index in
+          let group =
+            Printf.sprintf "<g transform=\"%s\">%s</g>"
+              (svg_of_transform current_transform)
+              (render_elements elements)
+          in
+          group ^ render_copies (index + 1)
+      in
+      render_copies 0
 
 (** [render_elements elements] renders all elements in order. *)
 and render_elements elements =

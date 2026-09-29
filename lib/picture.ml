@@ -60,6 +60,7 @@ type element =
   | Line of line
   | Text of text
   | Transform of transform * element list
+  | Repeat of int * transform * element list
 
 type picture = {
   width : float;
